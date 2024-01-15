@@ -1,4 +1,3 @@
-
 def get_sp500_df():
     """
     look at documentation!: pypi.org/project/yfinance
@@ -6,18 +5,23 @@ def get_sp500_df():
     
     filename = f"output/dumps/SP500_temp.dump"
     
+    use_disk = False
+    
     # Check if file exists
     if os.path.exists(filename):
         print("Data exists on disk, checking if data is stale...")
         (df, instruments) = gu.load_file(filename)     
         
-        today = datetime.today()
+        today = datetime.today().replace(tzinfo=None)
         # Get the last updated date from the index of the DataFrame
-        last_date_in_df = df.index.max()
+        last_date_in_df = df.index.max().replace(tzinfo=None)  # Convert to timezone-naive datetime
         
         if today - last_date_in_df >= timedelta(days=100):
             print("Data is more than 100 days old, fetching new data...")
             use_disk = False
+        else:
+            print('Data is up to date, using data from disk')
+            use_disk = True
     else:
         print("No data on disk, fetching new data...")
         use_disk = False
